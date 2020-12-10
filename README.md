@@ -1,7 +1,7 @@
 # slat
 Service Level Agreement Tool
 
-# How to deploy slat
+## How to deploy slat
 Register a client in IAM with the following properties:
 
 - redirect uri: `https://<SLAT_HOST>:<PORT>/login/iam/authorized`
@@ -120,7 +120,7 @@ Start the slat app:
 FLASK_app=slat flask run --host=0.0.0.0 --cert cert.pem --key privkey.pem --port 443
 ```
 
-# DB prerequisites:
+## DB prerequisites:
 
 ```
 You must have a running instance of MySql
