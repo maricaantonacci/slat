@@ -1,0 +1,59 @@
+{ "preferences": [
+    {
+      "customer": "{{customer}}",
+      "preferences": [
+        {
+          "service_type": "compute",
+          "priority": [
+            {%- for sla in slas -%}
+            {
+              "sla_id": "{{ sla['id' ]}}",
+              "service_id": "{{ sla['type'] }}"
+            }{{ ", " if not loop.last }}
+            {%- endfor -%}
+            ]
+        }
+      ]
+    }
+  ],
+  "sla": [
+    {%- for sla in slas -%}
+    {
+      "customer": "{{ customer }}",
+      "provider": "{{ sla['provider'] }}",
+      "start_date": "{{ sla['start_date'] }}",
+      "end_date": "{{ sla['end_date'] }}",
+      "services": [
+        {
+          "type": "computing",
+          "service_id": "{{ sla['type'] }}",
+          "targets": [
+            {
+              "type": "public_ip",
+              "unit": null,
+              "restrictions": {
+                "total_guaranteed": {{ sla['public_ips']|default(0) }},
+                "user_guaranteed": {{ sla['public_ips']|default(0) }},
+                "user_limit": {{ sla['public_ips']|default(0) }},
+                "total_limit": {{ sla['public_ips']|default(0) }}
+              }
+            },
+            {
+              "type": "computing_time",
+              "unit": "h",
+              "restrictions": {
+                "total_guaranteed": {{ sla['vcpu_cores']|default(0, true) }},
+                "instance_limit": {{ sla['vcpu_cores']|default(0, true) }},
+                "user_guaranteed": {{ sla['vcpu_cores']|default(0, true) }},
+                "user_limit": {{ sla['vcpu_cores']|default(0, true) }},
+                "total_limit": {{ sla['vcpu_cores']|default(0, true) }}
+              }
+            }
+          ]
+        }
+      ],
+      "id": "{{ sla['id'] }}"
+    }{{ ", " if not loop.last }}
+    {%- endfor -%}
+    ]
+}

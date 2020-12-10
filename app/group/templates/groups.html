@@ -1,0 +1,94 @@
+{% extends "layout.html" %}
+
+{% block content %}
+ <div class="container-fluid">
+    <div class="card m-4">
+        <div class="card-header info-color white-text">
+            <div class="row">
+                <div class="col-6 text-uppercase">
+                    <h5><strong>{{title}}</strong></h5>
+                </div>
+                <div class="col-6 text-right">
+                    <span><a role="button" class="btn btn-sm btn-outline-white waves-effect m-0" href="{{ url_for('group_bp.create') }}"><i class="fas fa-plus mr-1"></i>New</a></span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body px-lg-5 pt-3">
+
+            <div class="table-responsive">
+                <table class="table table-striped dt-responsive nowrap table-sm" id="dtgroups" width="100%" cellspacing="0" style="width:100%">
+                <!--Table head-->
+                  <thead>
+                    <tr>
+                      <th class="th-sm">Group name</th>
+                      <th class="th-sm">Description</th>
+                      <th class="th-sm">Actions</th>
+                     </tr>
+                  </thead>
+                  <!--Table body-->
+                  <tbody>
+                    {% for group in groups %}
+                    <tr>
+                        <td>{{ group.name }}</td>
+                        <td>{{ group.description }}</td>
+                        <td>
+                            <span><a role="button" class="btn btn-sm btn-primary mb-2" href="{{ url_for('group_bp.view', name=group.name) }}">View</a></span>
+                            <span><a role="button" class="btn btn-sm btn-info mb-2" href="{{ url_for('group_bp.edit', name=group.name) }}">Edit</a></span>
+                            <span><a role="button" data-id="{{group.name}}" data-action="{{ url_for('group_bp.delete', name=group.name) }}" class="btn btn-sm btn-danger mb-2" data-toggle="modal" data-target="#delete_group">Delete</a></span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+<!-- DELETE Modal -->
+    <div class="modal" id="delete_group" tabindex="-1" role="dialog" aria-labelledby="delete_label"
+      aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="delete_label">Confirm deletion</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            Do you really want to delete the group?
+          </div>
+          <div class="modal-footer">
+            <a role="button" class="btn btn-sm btn-primary" data-dismiss="modal">Cancel</a>
+            <a role="button" class="btn btn-sm btn-danger" href="">Delete</a>
+          </div>
+        </div>
+      </div>
+    </div>
+ </div>
+
+
+<script>
+$(document).ready(function () {
+
+    $('#dtgroups').dataTable( {
+    });
+
+});
+
+</script>
+
+<script>
+$('#delete_group').on('show.bs.modal', function (event) {
+    var target = $(event.relatedTarget) // Button that triggered the modal
+    // Extract info from data-* attributes
+    var group = target.data('id')
+    var url = target.data('action')
+
+    var modal = $(this)
+    modal.find('.modal-title').text('Confirm deletion for group ' + group)
+    modal.find('.btn-danger').prop('href', url)
+})
+</script>
+
+{% endblock %}

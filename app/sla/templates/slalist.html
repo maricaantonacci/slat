@@ -1,0 +1,102 @@
+{% extends "layout.html" %}
+
+{% block content %}
+ <div class="container-fluid">
+    <div class="card m-4">
+        <div class="card-header info-color white-text">
+            <div class="row">
+                <div class="col-6 text-uppercase">
+                    <h5><strong>{{title}}</strong></h5>
+                </div>
+                <div class="col-6 text-right">
+                    <span><a role="button" class="btn btn-sm btn-outline-white waves-effect m-0" href="{{ url_for('sla_bp.create') }}"><i class="fas fa-plus mr-1"></i>New</a></span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body px-lg-5 pt-3">
+
+            <div class="table-responsive">
+                <table class="table table-striped dt-responsive nowrap table-sm" id="dtsla" width="100%" cellspacing="0" style="width:100%">
+                <!--Table head-->
+                  <thead>
+                    <tr>
+                      <th class="th-sm">SLA document id</th>
+                      <th class="th-sm">Customer</th>
+                      <th class="th-sm">Type</th>
+                      <th class="th-sm">Start date</th>
+                      <th class="th-sm">Expiration date</th>
+                      <th class="th-sm">Actions</th>
+                     </tr>
+                  </thead>
+                  <!--Table body-->
+                  <tbody>
+                    {% for sla in slas %}
+                    <tr>
+                        <td>{{ sla.id }}</td>
+                        <td>{{ sla.customer }}</td>
+                        <td>{{ sla.type }}</td>
+                        <td>{{ sla.start_date }}</td>
+                        <td>{{ sla.end_date }}</td>
+                        <td>
+                            <span><a role="button" class="btn btn-sm btn-primary mb-2" href="{{ url_for('sla_bp.view', sla_id=sla.id) }}">View</a></span>
+                            <span><a role="button" class="btn btn-sm btn-info mb-2" href="{{ url_for('sla_bp.edit', id=sla.id) }}">Edit</a></span>
+                            <span><a role="button" data-id="{{sla.id}}" data-action="{{ url_for('sla_bp.delete', id=sla.id) }}" class="btn btn-sm btn-danger mb-2" data-toggle="modal" data-target="#delete_sla">Delete</a></span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+<!-- DELETE Modal -->
+    <div class="modal" id="delete_sla" tabindex="-1" role="dialog" aria-labelledby="delete_label"
+      aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="delete_label">Confirm deletion</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            Do you really want to delete the SLA?
+          </div>
+          <div class="modal-footer">
+            <a role="button" class="btn btn-sm btn-primary" data-dismiss="modal">Cancel</a>
+            <a role="button" class="btn btn-sm btn-danger" href="">Delete</a>
+          </div>
+        </div>
+      </div>
+    </div>
+ </div>
+
+
+
+
+<script>
+$(document).ready(function () {
+
+    $('#dtsla').dataTable( {
+    });
+
+});
+
+</script>
+
+<script>
+$('#delete_sla').on('show.bs.modal', function (event) {
+    var target = $(event.relatedTarget) // Button that triggered the modal
+    // Extract info from data-* attributes
+    var sla = target.data('id')
+    var url = target.data('action')
+
+    var modal = $(this)
+    modal.find('.modal-title').text('Confirm deletion for SLA ' + sla)
+    modal.find('.btn-danger').prop('href', url)
+})
+</script>
+
+{% endblock %}

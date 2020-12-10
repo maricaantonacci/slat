@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="card m-4">
+        <div class="card-header info-color white-text">
+            <div class="row">
+                <div class="col-6 text-uppercase">
+                    <h5><strong>{{title}}</strong></h5>
+                </div>
+                <div class="col-6 text-right">
+                    <button type=button class="btn btn-sm btn-outline-white waves-effect m-0" onclick="history.back()"><i class="fas fa-arrow-left mr-1"></i> Back</button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body px-lg-5 pt-0">
+            <p>
+            <h4>General information:</h4>
+            </p>
+            <br>
+            <dl class="row">
+                <dt class="col-sm-4">Type:</dt>
+                <dd class="col-sm-8">{{ sla.type }}</dd>
+                <dt class="col-sm-4">Customer:</dt>
+                <dd class="col-sm-8">{{ sla.customer }}</dd>
+                <dt class="col-sm-4">Start date:</dt>
+                <dd class="col-sm-8">{{ sla.start_date }}</dd>
+                <dt class="col-sm-4">Expiration date:</dt>
+                <dl class="col-sm-8">{{ sla.end_date }}</dl>
+            </dl>
+            <hr>
+            <p>
+            <h4>Allocated resources:</h4>
+            </p>
+            <br>
+            <dl class="row">
+                <dt class="col-sm-4">Number of Virtual Machines:</dt>
+                <dd class="col-sm-8">{{ sla.num_instances }}</dd>
+                <dt class="col-sm-4">Total number of vCPUs:</dt>
+                <dd class="col-sm-8">{{ sla.vcpu_cores }}</dd>
+                <dt class="col-sm-4">Total amount of RAM in GB:</dt>
+                <dd class="col-sm-8">{{ sla.ram_gb }}</dd>
+                <dt class="col-sm-4">Total number of Public IPs:</dt>
+                <dd class="col-sm-8">{{ sla.public_ips }}</dd>
+                <dt class="col-sm-4">Total amount of storage in GB:</dt>
+                <dd class="col-sm-8">{{ sla.storage_gb }}</dd>
+            </dl>
+
+        </div>
+    </div>
+ </div>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="card m-4">
+        <div class="card-header info-color white-text">
+            <div class="row">
+                <div class="col-6 text-uppercase">
+                    <h5><strong>{{title}}</strong></h5>
+                </div>
+                <div class="col-6 text-right">
+                    <button type=button class="btn btn-sm btn-outline-white waves-effect m-0" onclick="history.back()"><i class="fas fa-arrow-left mr-1"></i> Back</button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body px-lg-5 pt-0">
+            <p>
+            <h4>General information:</h4>
+            </p>
+            <br>
+            <dl class="row">
+                <dt class="col-sm-2">Name:</dt>
+                <dd class="col-sm-10">{{ group.name }}</dd>
+                <dt class="col-sm-2">Description:</dt>
+                <dd class="col-sm-10">{{ group.description }}</dd>
+            </dl>
+            <hr>
+            <p>
+            <h4>Service Level Agreements:</h4>
+            </p>
+            <br>
+
+            <div class="table-responsive">
+                <table class="table table-striped dt-responsive nowrap table-sm" id="dtsla" width="100%" cellspacing="0" style="width:100%">
+                <!--Table head-->
+                  <thead>
+                    <tr>
+                      <th class="th-sm">SLA id</th>
+                      <th class="th-sm">Provider</th>
+                      <th class="th-sm">Type</th>
+                      <th class="th-sm">Start date</th>
+                      <th class="th-sm">Expiration date</th>
+                      <th class="th-sm">Actions</th>
+                     </tr>
+                  </thead>
+                  <!--Table body-->
+                  <tbody>
+                    {% for sla in slas %}
+                    <tr>
+                        <td>{{ sla.id }}</td>
+                        <td>{{ sla.provider }}</td>
+                        <td>{{ sla.type }}</td>
+                        <td>{{ sla.start_date }}</td>
+                        <td>{{ sla.end_date }}</td>
+                        <td>
+                            <span><a role="button" class="btn btn-sm btn-primary mb-2" href="{{ url_for('sla_bp.view', sla_id=sla.id) }}">View</a></span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+ </div>
+
+
+<script>
+$(document).ready(function () {
+    $('#dtsla').dataTable( {
+    });
+});
+</script>
+
+{% endblock %}
