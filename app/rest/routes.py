@@ -24,14 +24,14 @@ rest_bp = Blueprint('rest_bp', __name__,
 cmdb_client = cmdb.Client(app.config.get("CMDB_URL"))
 
 class TokenDecoder:
-    def get_group(self, request):
+    def get_groups(self, request):
         access_token = tokentools.get_access_token_from_request(request)
         info = flaat.get_info_thats_in_at(access_token)
         iss = info['body']['iss']
         type = [ k['type'] for k in app.config.get('TRUSTED_OIDC_IDP_LIST') if k.get('iss')==iss]
 
         decoder = decoders.factory.get_decoder(type[0])
-        return decoder.get_group(info)
+        return decoder.get_groups(info)
 
 
 # @rest_bp.route("/create", methods=["POST"])
@@ -62,9 +62,12 @@ class TokenDecoder:
 def get(legacy_customer=None):
 
     td = TokenDecoder()
-    group = td.get_group(request)
+    groups = td.get_groups(request)
 
-    slas = db.session.query(models.Sla).filter(models.Sla.customer == group).all()
+    # get first group that has an associated SLA
+    group = next(filter(lambda group : db.session.query(models.Sla).filter(models.Sla.customer==group).all(), groups))
+    slas = db.session.query(models.Sla).filter(models.Sla.customer==group).all()
+
     app.logger.debug("Requesting slas for group {}: {}".format(group, slas))
 
     response = make_response(render_template('slas.json', slas=slas, customer=legacy_customer))

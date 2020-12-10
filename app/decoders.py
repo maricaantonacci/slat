@@ -14,8 +14,8 @@
 
 
 class IndigoTokenDecoder:
-    def get_group(self, info):
-        return info['body']['groups'][0]
+    def get_groups(self, info):
+        return info['body']['groups']
 
 class TokenDecoderFactory:
 
