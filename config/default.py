@@ -13,7 +13,7 @@
 # limitations under the License.
 
 ### DB SETTINGS
-SQLALCHEMY_DATABASE_URI = "mysql+pymysql://slam:slam@localhost:3306/slam"
+SQLALCHEMY_DATABASE_URI = "mysql+pymysql://slat:slat@localhost:3306/slat"
 SQLALCHEMY_TRACK_MODIFICATIONS = "False"
 
 #### AUTH SETTINGS
