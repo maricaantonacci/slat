@@ -28,7 +28,6 @@ instance
 Here is an example of config.json:
 ````
 {
-{
   "SQLALCHEMY_DATABASE_URI": "mysql+pymysql://slat:slat@localhost:3310/slat",
   "CMDB_URL": "https://indigo-paas.cloud.infn.it/cmdb",
   "TRUSTED_OIDC_IDP_LIST": [
@@ -40,8 +39,6 @@ Here is an example of config.json:
   "IAM_BASE_URL": "https://iam-test.indigo-datacloud.eu/",
   "IAM_CLIENT_ID": "THIS-IS-MYCLI-ENTID",
   "IAM_CLIENT_SECRET": "THISISMYCLIENTSECRET"
-}
-
 }
 ````
 
