@@ -8,11 +8,41 @@ Register a client in IAM with the following properties:
 - scopes: 'openid', 'email', 'profile', 'offline_access'
 
 Create the folder `instance` to put the application configuration file:
- - (mandatory) `config.json` file (see the [example](app/config-sample.json))
+ - (mandatory) `config.json` file (see the example below)
  
 ````
 instance
 |____config.json
+````
+
+| Parameter name  | Description | Mandatory (Y/N) | Default Value 
+| -------------- | ------------- |------------- |------------- |
+| IAM_BASE_URL | Base URL of the IAM used for the authenticated access to the slat dashboard  | Y | N/A
+| IAM_CLIENT_ID | IAM client ID | Y | N/A
+| IAM_CLIENT_SECRET | IAM client Secret | Y | N/A
+| TRUSTED_OIDC_IDP_LIST | List of OpenID-Connect IdPs that are trusted by the slat app.<br>The REST API endpoint can be accessed using access tokens issued by IdPs in this list  | Y | N/A.<br>The format of this field is:<br> <code> [ { 'iss': 'https://iam.example.org/', 'type': 'indigoiam' }, { 'iss': 'https://iam2.example.org/', 'type': 'indigoiam' }  ] </code>
+| SQLALCHEMY_DATABASE_URI | The database URI that should be used for the connection | N | Default: "mysql+pymysql://slat:slat@localhost:3306/slat"
+| LOG_LEVEL | Logging level | N | Default: INFO
+| CMDB_URL | URL of the CMDB to retrieve information about the services | Y | N/A
+
+Here is an example of config.json:
+````
+{
+{
+  "SQLALCHEMY_DATABASE_URI": "mysql+pymysql://slat:slat@localhost:3310/slat",
+  "CMDB_URL": "https://indigo-paas.cloud.infn.it/cmdb",
+  "TRUSTED_OIDC_IDP_LIST": [
+    {
+      "iss": "https://iam-test.indigo-datacloud.eu/",
+      "type": "indigoiam"
+    }
+  ],
+  "IAM_BASE_URL": "https://iam-test.indigo-datacloud.eu/",
+  "IAM_CLIENT_ID": "THIS-IS-MYCLI-ENTID",
+  "IAM_CLIENT_SECRET": "THISISMYCLIENTSECRET"
+}
+
+}
 ````
 
 You need to run slat on HTTPS (otherwise you will get an error); you can choose between
