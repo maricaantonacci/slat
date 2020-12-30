@@ -11,8 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from flaat import tokentools
-from sqlalchemy.exc import IntegrityError
+from flaat import tokentools, issuertools
 from app import app, flaat, decoders, models, db, cmdb
 from flask import Blueprint, request, render_template, make_response
 
@@ -26,11 +25,18 @@ cmdb_client = cmdb.Client(app.config.get("CMDB_URL"))
 class TokenDecoder:
     def get_groups(self, request):
         access_token = tokentools.get_access_token_from_request(request)
-        info = flaat.get_info_thats_in_at(access_token)
-        iss = info['body']['iss']
-        type = [ k['type'] for k in app.config.get('TRUSTED_OIDC_IDP_LIST') if k.get('iss')==iss]
+        issuer = issuertools.find_issuer_config_in_at(access_token)
+        #info = flaat.get_info_thats_in_at(access_token)
+        info = flaat.get_info_from_userinfo_endpoints(access_token)
+        iss = issuer['issuer']
 
-        decoder = decoders.factory.get_decoder(type[0])
+        idp = next(filter(lambda x: x['iss']==iss, app.config.get('TRUSTED_OIDC_IDP_LIST')))
+
+        if 'client_id' in idp and 'client_secret' in idp:
+            flaat.set_client_id(idp['client_id'])
+            flaat.set_client_secret(idp['client_secret'])
+            info = flaat.get_info_from_introspection_endpoints(access_token)
+        decoder = decoders.factory.get_decoder(idp['type'])
         return decoder.get_groups(info)
 
 
@@ -64,11 +70,14 @@ def get(legacy_customer=None):
     td = TokenDecoder()
     groups = td.get_groups(request)
 
+    app.logger.debug("Requesting slas for group {}".format(groups))
+    slas = []
     # get first group that has an associated SLA
-    group = next(filter(lambda group : db.session.query(models.Sla).filter(models.Sla.customer==group).all(), groups))
-    slas = db.session.query(models.Sla).filter(models.Sla.customer==group).all()
+    group = next(filter(lambda group : db.session.query(models.Sla).filter(models.Sla.customer==group).all(), groups), None)
+    if group:
+      slas = db.session.query(models.Sla).filter(models.Sla.customer==group).all()
 
-    app.logger.debug("Requesting slas for group {}: {}".format(group, slas))
+    app.logger.debug("Computed slas: {}".format(slas))
 
     response = make_response(render_template('slas.json', slas=slas, customer=legacy_customer))
     response.headers['Content-Type'] = 'application/json'
