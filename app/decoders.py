@@ -11,11 +11,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import re
 
 class IndigoTokenDecoder:
     def get_groups(self, info):
-        return info['body']['groups']
+        return info['groups']
+
+class EgiTokenDecoder:
+    def get_groups(self, info):
+        memberships = info['eduperson_entitlement']
+        pattern = 'urn:mace:egi.eu:group:(.*):role=vm_operator#aai.egi.eu'
+
+        groups=[]
+        for m in memberships:
+            match = re.search(pattern, m)
+            if match:
+                groups.append(match.group(1))
+
+        return groups
 
 class TokenDecoderFactory:
 
@@ -34,6 +47,6 @@ class TokenDecoderFactory:
 
 factory = TokenDecoderFactory()
 factory.register_format('indigoiam', IndigoTokenDecoder)
-#factory.register_format('EGI', EgiTokenDecoder)
+factory.register_format('egicheckin', EgiTokenDecoder)
 
 
