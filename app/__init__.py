@@ -18,7 +18,7 @@ from flask_dance import OAuth2ConsumerBlueprint
 from flask_dance.consumer.storage.sqla import SQLAlchemyStorage
 from flask_login import login_user, current_user
 from flaat import Flaat
-from .models import migrate, alembic, db, OAuth, User, login_manager
+from .models import migrate, alembic, db, OAuth, User, Role, login_manager
 import logging
 from flask_dance.consumer import oauth_authorized
 from sqlalchemy.orm.exc import NoResultFound
@@ -102,6 +102,7 @@ def iam_logged_in(blueprint, token):
 
     iam_info = resp.json()
     iam_user_id = str(iam_info["sub"])
+    iam_user_groups = str(iam_info["groups"])
 
     # Find this OAuth token in the database, or create it
     query = OAuth.query.filter_by(
@@ -135,6 +136,9 @@ def iam_logged_in(blueprint, token):
             email=iam_info["email"],
             name=iam_info["name"],
         )
+        # check user role
+        if app.config.get("SLAT_ADMIN_GROUP") in iam_user_groups:
+            user.roles = [Role(name="Admin")]
         # Associate the new local user account with the OAuth token
         oauth.user = user
         # Save and commit our database models

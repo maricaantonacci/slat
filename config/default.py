@@ -22,6 +22,11 @@ IAM_CLIENT_ID="MY_CLIENT_ID"
 IAM_CLIENT_SECRET="MY_CLIENT_SECRET"
 TRUSTED_OIDC_IDP_LIST = [ { 'iss': 'https://iam.example.org/', 'type': 'indigoiam' } ]
 
+### ROLES
+SLAT_ADMIN_GROUP = "slat-admin"
+SLAT_MANAGER_GROUP = "slat-manager"
+
 #### APP SETTINGS
 LOG_LEVEL = "DEBUG"
+USER_ENABLE_EMAIL = False
 CMDB_URL = "https://cmdb.example.org"

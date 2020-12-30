@@ -18,6 +18,7 @@ from flask_login import login_required
 from flask import Blueprint
 from app import models
 from app import cmdb
+from app.utils.decorators import *
 
 sla_bp = Blueprint('sla_bp', __name__,
                            template_folder='templates',
@@ -29,7 +30,7 @@ cmdb_client = cmdb.Client(app.config.get("CMDB_URL"))
 
 
 @sla_bp.route('/list', methods=["GET"])
-@login_required
+@roles_required(('Admin','SlaManager'))
 def home(customer=None):
     if not iam_blueprint.authorized:
         return redirect(url_for('iam.login'))
@@ -43,7 +44,7 @@ def home(customer=None):
     return render_template('slalist.html', title='SLAs', slas=slas)
 
 @sla_bp.route('/view', methods=["GET"])
-@login_required
+@roles_required(('Admin','SlaManager'))
 def view():
     sla_id = request.args.get('sla_id', None)
     if sla_id:
@@ -54,7 +55,7 @@ def view():
 
 
 @sla_bp.route('/edit/<id>', methods=['GET', 'POST'])
-@login_required
+@roles_required('Admin')
 def edit(id=None):
 
     sla = models.Sla.query.filter(models.Sla.id == id).first()
@@ -83,7 +84,7 @@ def edit(id=None):
 
 
 @sla_bp.route('/create', methods=["GET", "POST"])
-@login_required
+@roles_required(('Admin','SlaManager'))
 def create():
     form = forms.SlaForm()
 
@@ -113,7 +114,7 @@ def create():
 
 
 @sla_bp.route('/delete', methods=["GET"])
-@login_required
+@roles_required('Admin')
 def delete():
     id = request.args.get('id', None)
 

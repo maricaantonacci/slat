@@ -12,17 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from flask import Blueprint, flash, request, redirect, url_for, render_template
+from flask import Blueprint, url_for, render_template
 from app import app, forms, models, db
 from sqlalchemy.exc import IntegrityError
 from flask_login import login_required
+from app.utils.decorators import *
 
 group_bp = Blueprint('group_bp', __name__,
                            template_folder='templates',
                            static_folder='static')
 
+
 @group_bp.route("/create", methods=["GET", "POST"])
-@login_required
+@roles_required('Admin')
 def create():
 
     form = forms.GroupForm()
@@ -55,8 +57,9 @@ def list():
 
     return render_template('groups.html', title='Groups', groups=groups)
 
+
 @group_bp.route('/edit/<name>', methods=['GET', 'POST'])
-@login_required
+@roles_required('Admin')
 def edit(name=None):
 
     group = models.Group.query.filter(models.Group.name == name).first()
@@ -95,7 +98,7 @@ def view():
 
 
 @group_bp.route('/delete', methods=["GET"])
-@login_required
+@roles_required('Admin')
 def delete():
     name = request.args.get('name', None)
 

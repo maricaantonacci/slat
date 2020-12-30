@@ -38,8 +38,67 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(256), unique=True, nullable=False)
     email = db.Column(db.String(256), nullable=False)
+    roles = db.relationship('Role', secondary='user_roles')
 
+    def has_role(self, role):
 
+        for item in self.roles:
+            if item.name == role:
+                return True
+        return False
+
+    def has_roles(self, *requirements):
+        """ Return True if the user has all of the specified roles. Return False otherwise.
+            has_roles() accepts a list of requirements:
+                has_role(requirement1, requirement2, requirement3).
+            Each requirement is either a role_name, or a tuple_of_role_names.
+                role_name example:   'manager'
+                tuple_of_role_names: ('funny', 'witty', 'hilarious')
+            A role_name-requirement is accepted when the user has this role.
+            A tuple_of_role_names-requirement is accepted when the user has ONE of these roles.
+            has_roles() returns true if ALL of the requirements have been accepted.
+            For example:
+                has_roles('a', ('b', 'c'), d)
+            Translates to:
+                User has role 'a' AND (role 'b' OR role 'c') AND role 'd'"""
+
+        # Translates a list of role objects to a list of role_names
+        role_names = [role.name for role in self.roles]
+
+        # has_role() accepts a list of requirements
+        for requirement in requirements:
+            if isinstance(requirement, (list, tuple)):
+                # this is a tuple_of_role_names requirement
+                tuple_of_role_names = requirement
+                authorized = False
+                for role_name in tuple_of_role_names:
+                    if role_name in role_names:
+                        # tuple_of_role_names requirement was met: break out of loop
+                        authorized = True
+                        break
+                if not authorized:
+                    return False                    # tuple_of_role_names requirement failed: return False
+            else:
+                # this is a role_name requirement
+                role_name = requirement
+                # the user must have this role
+                if not role_name in role_names:
+                    return False                    # role_name requirement failed: return False
+
+        # All requirements have been met: return True
+        return True
+
+class Role(db.Model):
+    __tablename__ = 'role'
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(50), unique=True)
+
+# Define the UserRoles association table
+class UserRoles(db.Model):
+    __tablename__ = 'user_roles'
+    id = db.Column(db.Integer(), primary_key=True)
+    user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'))
+    role_id = db.Column(db.Integer(), db.ForeignKey('role.id', ondelete='CASCADE'))
 
 class OAuth(OAuthConsumerMixin, db.Model):
     __table_args__ = (
@@ -111,10 +170,16 @@ class Sla(db.Model):
 
 login_manager = LoginManager()
 login_manager.login_view = "iam.login"
+login_manager.login_message = None
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(user_id)
+
+
+
+
+
 
 
 
