@@ -8,7 +8,8 @@
             {%- for sla in slas -%}
             {
               "sla_id": "{{ sla['id' ]}}",
-              "service_id": "{{ sla['type'] }}"
+              "service_id": "{{ sla['type'] }}",
+              "weight": 1
             }{{ ", " if not loop.last }}
             {%- endfor -%}
             ]
