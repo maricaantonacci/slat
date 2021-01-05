@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from flask import Blueprint, url_for, render_template
+from flask import Blueprint, render_template
 from app import app, forms, models, db
 from sqlalchemy.exc import IntegrityError
 from flask_login import login_required
@@ -53,7 +53,12 @@ def create():
 @group_bp.route('/list', methods=["GET"])
 @login_required
 def list():
-    groups = models.Group.query.all()
+    user = current_user
+
+    if user.is_admin():
+        groups = models.Group.query.all()
+    else:
+        groups = user.groups
 
     return render_template('groups.html', title='Groups', groups=groups)
 

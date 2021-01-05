@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from functools import wraps
-from flask import current_app, flash, request, redirect
+from flask import current_app, flash, request, redirect, url_for
 from flask_login import current_user
 
 def roles_accepted(*role_names):
@@ -41,7 +41,7 @@ def roles_accepted(*role_names):
             allowed = current_user.is_authenticated
             if not allowed:
                 # Redirect to unauthenticated page
-                return login_manager.login_view
+                return redirect(url_for("login"))
 
             # User must have the required roles
             # NB: roles_required would call has_roles(*role_names): ('A', 'B') --> ('A', 'B')
@@ -49,7 +49,10 @@ def roles_accepted(*role_names):
             if not current_user.has_roles(role_names):
                 # Redirect to the unauthorized page
                 flash("Sorry, You are not authorized for this action.", 'warning')
-                return redirect(request.referrer)
+                if request.referrer:
+                    return redirect(request.referrer)
+                else:
+                    redirect(url_for("login"))
 
             # It's OK to call the view
             return view_function(*args, **kwargs)
@@ -82,13 +85,16 @@ def roles_required(*role_names):
             allowed = current_user.is_authenticated
             if not allowed:
                 # Redirect to unauthenticated page
-                return login_manager.login_view
+                return redirect(url_for("login"))
 
             # User must have the required roles
             if not current_user.has_roles(*role_names):
                 # Redirect to the unauthorized page
                 flash("Sorry, You are not authorized for this action.", 'warning')
-                return redirect(request.referrer)
+                if request.referrer:
+                    return redirect(request.referrer)
+                else:
+                    return redirect(url_for("login"))
 
             # It's OK to call the view
             return view_function(*args, **kwargs)

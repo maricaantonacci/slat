@@ -49,7 +49,8 @@ h5 {
             <h1 class="h1-reponsive white-text text-uppercase font-weight-bold mb-0 pt-md-5 pt-5 wow fadeInDown" data-wow-delay="0.3s"><strong>Service Level Agreement Tool</strong></h1>
             <hr class="hr-light my-4 wow fadeInDown" data-wow-delay="0.4s">
             <h5 class="text-uppercase mb-4 white-text wow fadeInDown" data-wow-delay="0.4s"><strong>Manage SLA configurations easily</strong></h5>
-            <a class="btn btn-outline-white wow fadeInDown" data-wow-delay="0.4s" href="{{ url_for('iam.login') }}">Sign in</a>
+            <button type="button" class="btn btn-outline-white wow fadeInDown" data-wow-delay="0.4s" data-toggle="modal" data-target="#signinModal">Sign in</button>
+            <!-- <a class="btn btn-outline-white wow fadeInDown" data-wow-delay="0.4s" href="{{ url_for('iam.login') }}">Sign in</a> -->
             <a class="btn btn-outline-white wow fadeInDown" data-wow-delay="0.4s" href="#">About this tool</a>
           </div>
           <!--Grid column-->
@@ -59,6 +60,32 @@ h5 {
       <!-- Content -->
     </div>
     <!-- Mask & flexbox options-->
+    <!-- Modal -->
+    <div class="modal fade" id="signinModal" tabindex="-1" role="dialog" aria-labelledby="signinModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-notify modal-info modal-sm" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <p class="heading lead">Sign in with:</p>
+            <!-- h4 class="modal-title w-100 font-weight-bold">Sign in</h4-->
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true" class="white-text">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body mx-3">
+            <!--div class="md-form mb-5"-->
+              <div class="row justify-content-center">
+                <a class="btn btn-outline-black wow fadeInDown" data-wow-delay="0.4s" href="{{ url_for('iam.login') }}"><img src="../static/images/indigodc_logo.png" height="25"/>INDIGO - IAM</a>
+              </div>
+              {% if is_egi_aai_enabled is defined %}
+              <div class="row justify-content-center">
+                <a class="btn btn-outline-black wow fadeInDown" data-wow-delay="0.4s" href="{{ url_for('egiaai.login') }}"><img src="../static/images/egi_logo.png" height="25"/>EGI Checkin</a>
+              </div>
+              {% endif %}
+            <!--/div-->
+          </div>
+        </div>
+      </div>
+    </div>
 </div>
 
 {% endblock %}

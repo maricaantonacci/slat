@@ -12,12 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from flask import request, render_template, flash, redirect, url_for
-from app import app, db, forms, iam_blueprint
+from flask import Blueprint, render_template
 from flask_login import login_required
-from flask import Blueprint
-from app import models
-from app import cmdb
+from app import app, cmdb, db, forms, models
 from app.utils.decorators import *
 
 sla_bp = Blueprint('sla_bp', __name__,
@@ -30,16 +27,15 @@ cmdb_client = cmdb.Client(app.config.get("CMDB_URL"))
 
 
 @sla_bp.route('/list', methods=["GET"])
-@roles_required(('Admin','SlaManager'))
-def home(customer=None):
-    if not iam_blueprint.authorized:
-        return redirect(url_for('iam.login'))
+@login_required
+def home():
 
-    slas = []
-    if customer:
-        slas = db.session.query(models.Sla).filter(models.Sla.customer == customer).all()
-    else:
+    if current_user.is_admin():
         slas = models.Sla.query.order_by(models.Sla.customer).all()
+    else:
+        slas = []
+        for group in current_user.groups:
+            slas.extend(group.slas)
 
     return render_template('slalist.html', title='SLAs', slas=slas)
 
@@ -72,7 +68,7 @@ def edit(id=None):
         except Exception as e:
             flash("Error updating the SLA: {}".format(str(e)), 'danger')
 
-        return redirect(url_for('search_sla'))
+        return redirect(url_for('sla_bp.home'))
 
     # disable fields that cannot be changed
     form.type.choices = [(sla.type, sla.type, dict(disabled='disabled'))]

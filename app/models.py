@@ -22,7 +22,7 @@ from flask_migrate import Migrate
 from flask_alembic import Alembic
 from flask_login import UserMixin
 from flask_login import LoginManager
-
+from flaat import tokentools
 
 # initialize SQLAlchemy
 db: SQLAlchemy = SQLAlchemy()
@@ -36,9 +36,13 @@ alembic: Alembic = Alembic()
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(256), unique=True, nullable=False)
+    name = db.Column(db.String(256),  nullable=False)
     email = db.Column(db.String(256), nullable=False)
-    roles = db.relationship('Role', secondary='user_roles')
+    groups = db.relationship('Group', secondary='roles')
+
+    def is_admin(self):
+        role_names = [role.name for role in self.roles]
+        return True if 'Admin' in role_names else False
 
     def has_role(self, role):
 
@@ -88,17 +92,26 @@ class User(UserMixin, db.Model):
         # All requirements have been met: return True
         return True
 
-class Role(db.Model):
-    __tablename__ = 'role'
+class Group(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String(50), unique=True)
+    name = db.Column(db.String(64), unique=True, nullable=False)
+    description = db.Column(db.String(64), nullable=True)
+    users = db.relationship("User", secondary="roles")
+    slas = db.relationship('Sla', backref='customer_slas', lazy=True)
 
-# Define the UserRoles association table
-class UserRoles(db.Model):
-    __tablename__ = 'user_roles'
+    def __repr__(self):
+        return '<Group {}>'.format(self.name)
+
+# Define the UserGroups association table
+class Role(db.Model):
+    __tablename__ = 'roles'
     id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'))
-    role_id = db.Column(db.Integer(), db.ForeignKey('role.id', ondelete='CASCADE'))
+    group_id = db.Column(db.Integer(), db.ForeignKey('group.id', ondelete='CASCADE'))
+    name = db.Column(db.String(64), default="Member")
+
+    user = db.relationship(User, backref=db.backref("roles", cascade="all, delete-orphan"))
+    group = db.relationship(Group, backref=db.backref("roles", cascade="all, delete-orphan"))
 
 class OAuth(OAuthConsumerMixin, db.Model):
     __table_args__ = (
@@ -106,6 +119,7 @@ class OAuth(OAuthConsumerMixin, db.Model):
     )
     provider_user_id = db.Column(db.String(256), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=False)
+    issuer = db.Column(db.String(50), nullable=False)
     user = db.relationship(
         User,
         # This `backref` thing sets up an `oauth` property on the User model,
@@ -118,23 +132,20 @@ class OAuth(OAuthConsumerMixin, db.Model):
         ),
     )
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        token = kwargs['token']
+        jwt = tokentools.get_accesstoken_info(token['id_token'])
+        if not 'provider_user_id' in kwargs:
+            self.provider_user_id = jwt['body']['sub']
+        if not 'issuer' in kwargs:
+            self.issuer = jwt['body']['iss']
+
 
 
 """GUID helper for backend-agnostic UUID column type"""
 from app.utils.sqlalchemy_helpers import GUID, IntEnum
 db.GUID = GUID
-
-class Group(db.Model):
-    name = db.Column(db.String(64), primary_key=True, nullable=False)
-    description = db.Column(db.String(64), nullable=True)
-    slas = db.relationship('Sla', backref='customer_slas', lazy=True)
-
-    def __init__(self, *args):
-        super(db.Model, self).__init__(*args)
-
-    def __repr__(self):
-        return '<Group {}>'.format(self.name)
-
 
 class SlaStatusTypes(enum.IntEnum):
     draft = 1
@@ -169,8 +180,9 @@ class Sla(db.Model):
 
 
 login_manager = LoginManager()
-login_manager.login_view = "iam.login"
 login_manager.login_message = None
+login_manager.login_message_category = "info"
+login_manager.login_view = "login"
 
 @login_manager.user_loader
 def load_user(user_id):
