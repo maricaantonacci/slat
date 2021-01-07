@@ -33,3 +33,4 @@ SLAT_ADMIN_GROUP = "slat-admin"
 LOG_LEVEL = "DEBUG"
 USER_ENABLE_EMAIL = False
 CMDB_URL = "https://cmdb.example.org"
+CMDB_CA_CERT = None

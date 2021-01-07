@@ -25,14 +25,15 @@ class Client:
 
     """
 
-    def __init__(self, base_url, timeout=30):
+    def __init__(self, base_url, timeout=30, cacert = None):
         self.timeout = timeout
         self.base_url = base_url
+        self.verify = cacert if cacert else True
 
 
     def is_valid_service(self, service_id):
         url = "{}/service/id/{}".format(self.base_url, service_id)
-        response = requests.get(url)
+        response = requests.get(url, timeout=self.timeout, verify=self.verify)
 
         if response.ok:
             return True
@@ -42,7 +43,7 @@ class Client:
     def get_services(self, detailed=False):
         option = "?include_docs=true" if detailed else ""
         url = "{}/service/list{}".format(self.base_url, option)
-        response = requests.get(url)
+        response = requests.get(url, timeout=self.timeout, verify=self.verify)
 
         if response.ok:
             return response.json()['rows']
@@ -52,7 +53,7 @@ class Client:
     def get_service(self, id, detailed=False):
         option = "?include_docs=true" if detailed else ""
         url = "{}/service/id/{}{}".format(self.base_url, id, option)
-        response = requests.get(url)
+        response = requests.get(url, timeout=self.timeout, verify=self.verify)
 
         if response.ok:
             return response.json()['data']

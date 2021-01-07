@@ -22,7 +22,7 @@ sla_bp = Blueprint('sla_bp', __name__,
                            static_folder='static')
 
 
-cmdb_client = cmdb.Client(app.config.get("CMDB_URL"))
+cmdb_client = cmdb.Client(app.config.get("CMDB_URL"), cacert=app.config.get("CMDB_CA_CERT"))
 
 
 

@@ -20,7 +20,7 @@ rest_bp = Blueprint('rest_bp', __name__,
                            static_folder='static')
 
 
-cmdb_client = cmdb.Client(app.config.get("CMDB_URL"))
+cmdb_client = cmdb.Client(app.config.get("CMDB_URL"), cacert=app.config.get("CMDB_CA_CERT"))
 
 class TokenDecoder:
     def get_groups(self, request):
