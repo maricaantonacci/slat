@@ -14,7 +14,7 @@
 
 from flask_wtf import FlaskForm
 from wtforms import StringField, IntegerField, SelectField, SubmitField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, ValidationError
 from wtforms.fields.html5 import DateField
 from wtforms.widgets import html_params, Select
 from markupsafe import Markup
@@ -55,7 +55,6 @@ class AttribSelectField(SelectField):
 
 class SlaForm(FlaskForm):
     type = AttribSelectField('Service', validators=[DataRequired()], coerce=str, validate_choice=False)
-    #customer = StringField('Customer Group', validators=[DataRequired()])
     customer = AttribSelectField('Customer Group', validators=[DataRequired()], coerce=str, validate_choice=False)
     start_date = DateField('Effective from', validators=[DataRequired()])
     end_date = DateField('Expiration Date', validators=[DataRequired()])
@@ -65,6 +64,10 @@ class SlaForm(FlaskForm):
     public_ips = IntegerField('Total number of Public IPs (if applicable)', default=0)
     storage_gb = IntegerField('Total amount of storage in GB (if applicable)', default=0)
     submit = SubmitField('Save')
+
+    def validate_end_date(form, field):
+        if field.data <= form.start_date.data:
+            raise ValidationError("End date must be later than start date.")
 
 
 
