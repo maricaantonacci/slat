@@ -47,7 +47,7 @@ def create():
 
         return redirect(url_for('group_bp.list'))
 
-    return render_template('groupform.html', form=form)
+    return render_template('groupform.html', title="Create group", form=form)
 
 
 @group_bp.route('/list', methods=["GET"])
