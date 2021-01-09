@@ -28,7 +28,7 @@ cmdb_client = cmdb.Client(app.config.get("CMDB_URL"), cacert=app.config.get("CMD
 
 @sla_bp.route('/list', methods=["GET"])
 @login_required
-def home():
+def list():
 
     if current_user.is_admin():
         slas = models.Sla.query.order_by(models.Sla.customer).all()
@@ -37,7 +37,7 @@ def home():
         for group in current_user.groups:
             slas.extend(group.slas)
 
-    return render_template('slalist.html', title='SLAs', slas=slas)
+    return render_template('slalist.html', title='Service Level Agreements', slas=slas)
 
 @sla_bp.route('/view', methods=["GET"])
 @roles_required(('Admin','SlaManager'))
@@ -68,7 +68,7 @@ def edit(id=None):
         except Exception as e:
             flash("Error updating the SLA: {}".format(str(e)), 'danger')
 
-        return redirect(url_for('sla_bp.home'))
+        return redirect(url_for('sla_bp.list'))
 
     # disable fields that cannot be changed
     form.type.choices = [(sla.type, sla.type, dict(disabled='disabled'))]
@@ -98,15 +98,23 @@ def create():
         except Exception as e:
             flash("Error saving the draft SLA: {}".format(str(e)), 'danger')
 
-        return redirect(url_for('sla_bp.home'))
+        return redirect(url_for('sla_bp.list'))
+
 
     groups = models.Group.query.all()
     if not groups:
         flash('Cannot retrieve customer information. Configure group before', 'danger')
     form.customer.choices = [ (g.name, g.name, dict(data_subtext=g.description)) for g in groups]
-    services = cmdb_client.get_services(detailed=True)
-    form.type.choices = [(s['id'], s['id'], dict(data_subtext="site: {}, service type: {}, service endpoint: {}".format(s['value']['sitename'], s['doc']['data']['service_type'], s['doc']['data']['endpoint']))) for s in services]
-    return render_template('slaform.html', title='Create SLA', form=form, services=services)
+
+    service_id = request.args.get('service_id', None)
+    if service_id:
+        form.type.data = service_id
+        form.type.choices = [(service_id, service_id, dict(disabled='disabled'))]
+        form.type.render_kw = {'disabled': 'disabled'}
+    else:
+        services = cmdb_client.get_services(detailed=True)
+        form.type.choices = [(s['id'], s['id'], dict(data_subtext="site: {}, service type: {}, service endpoint: {}".format(s['doc']['data']['sitename'], s['doc']['data']['service_type'], s['doc']['data']['endpoint']))) for s in services]
+    return render_template('slaform.html', title='Create SLA', form=form)
 
 
 @sla_bp.route('/delete', methods=["GET"])
@@ -125,4 +133,5 @@ def delete():
         app.logger.error("Error deleting SLA {}: {}".format(id, str(e)))
         flash("Error deleting SLA {}: {}".format(id, str(e)), 'warning')
 
-    return redirect(url_for('sla_bp.home'))
+    return redirect(url_for('sla_bp.list'))
+
