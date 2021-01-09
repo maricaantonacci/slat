@@ -1,5 +1,5 @@
 <nav class="navbar navbar-expand-lg navbar-dark elegant-color-dark justify-content-between">
-    <a class="navbar-brand" href="{{ url_for('sla_bp.home') }}">
+    <a class="navbar-brand" href="{{ url_for('sla_bp.list') }}">
         <strong style="cursive;">SLA Tool</strong>
     </a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -9,7 +9,10 @@
         <ul class="navbar-nav mr-auto">
             {% if current_user.is_authenticated %}
             <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('sla_bp.home') }}">SLAs</a>
+                <a class="nav-link" href="{{ url_for('provider_bp.list') }}">Providers</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('sla_bp.list') }}">SLAs</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('group_bp.list') }}">Groups</a>
