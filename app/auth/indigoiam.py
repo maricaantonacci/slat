@@ -36,7 +36,7 @@ def create_blueprint():
     token_url=iam_token_url,
     auto_refresh_url=iam_refresh_url,
     authorization_url=iam_authorization_url,
-    redirect_to='sla_bp.home',
+    redirect_to='provider_bp.list',
     storage=SQLAlchemyStorage(OAuth, db.session, user=current_user)
   )
 
