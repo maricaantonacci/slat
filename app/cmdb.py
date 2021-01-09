@@ -40,9 +40,12 @@ class Client:
         else:
             return False
 
-    def get_services(self, detailed=False):
+    def get_services(self, provider_id=None, detailed=False):
         option = "?include_docs=true" if detailed else ""
-        url = "{}/service/list{}".format(self.base_url, option)
+        if provider_id:
+            url = "{}/provider/id/{}/has_many/services{}".format(self.base_url, provider_id, option)
+        else:
+            url = "{}/service/list{}".format(self.base_url, option)
         response = requests.get(url, timeout=self.timeout, verify=self.verify)
 
         if response.ok:
@@ -57,5 +60,15 @@ class Client:
 
         if response.ok:
             return response.json()['data']
+        else:
+            return None
+
+    def get_providers(self, detailed=False):
+        option = "?include_docs=true" if detailed else ""
+        url = "{}/provider/list{}".format(self.base_url, option)
+        response = requests.get(url, timeout=self.timeout, verify=self.verify)
+
+        if response.ok:
+            return response.json()['rows']
         else:
             return None
