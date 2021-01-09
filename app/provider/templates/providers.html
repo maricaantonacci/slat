@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-3 mb-5">
+<div class="row row-cols-1 row-cols-md-3">
+  {% for provider in providers %}
+  <!-- Card -->
+  <div class="col mb-4">
+    <div class="card h-100">
+      <!--Card image-->
+      <div class="view overlay">
+        <img class="card-img-top" src="static/images/Cloud.jpg"
+          alt="Card image cap">
+        <a href="#!">
+          <div class="mask rgba-white-slight"></div>
+        </a>
+      </div>
+
+      <!--Card content-->
+      <div class="card-body">
+
+        <!--Title-->
+        <h4 class="card-title">{{provider['doc']['data']['name']}}</h4>
+        <!--Text-->
+        <p class="card-text">
+          Country: {{provider['doc']['data']['country']}}<br>
+          Contacts: {{provider['doc']['data']['owners']|join(',')}}
+        </p>
+        <!-- Provides extra visual weight and identifies the primary action in a set of buttons -->
+        <a type="button" class="btn btn-light-blue btn-md" href="{{ url_for('provider_bp.get_services', provider_id=provider['id']) }}">Services</a>
+
+      </div>
+
+    </div>
+  </div>
+    <!-- End Card -->
+    {% endfor %}
+</div>
+</div>
+{% endblock %}

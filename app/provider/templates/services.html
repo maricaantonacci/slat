@@ -1,0 +1,179 @@
+{% extends "layout.html" %}
+
+{% block content %}
+ <div class="container-fluid mb-5">
+
+    <!-- Heading -->
+      <div class="card m-4">
+
+        <!--Card content-->
+        <div class="card-body d-sm-flex justify-content-between text-primary">
+          <h4 class="mb-2 mb-sm-0 pt-1">
+            <span class="text-uppercase">{{title}}</span>
+          </h4>
+          <div class="d-flex justify-content-center">
+              <button type=button class="btn btn-sm btn-outline-blue waves-effect m-0" onclick="history.back()"><i class="fas fa-arrow-left mr-1"></i> Back</button>
+          </div>
+        </div>
+
+      </div>
+    <!-- End Heading -->
+    <div class="card m-4 wow fadeIn" data-wow-delay="0.6s">
+
+        <div class="card-body px-lg-5 pt-3">
+
+            <div class="table-responsive">
+                <table class="table table-striped dt-responsive nowrap table-sm" id="dtsla" width="100%" cellspacing="0" style="width:100%">
+                <!--Table head-->
+                  <thead class="blue lighten-4">
+                    <tr>
+                      <th class="th-sm">Id</th>
+                      <th class="th-sm">Type</th>
+                      <th class="th-sm">Endpoint</th>
+                      <th class="th-sm">Properties</th>
+                      <th class="th-sm">Actions</th>
+                     </tr>
+                  </thead>
+                  <!--Table body-->
+                  <tbody>
+                    {% for service in services %}
+                    <tr>
+                        <td>{{ service.id }}</td>
+                        <td>{{ service.doc.data.type }}</td>
+                        <td>{{ service.doc.data.endpoint }}</td>
+                        <td>
+                            <span><a role="button" class="btn btn-sm btn-primary mb-2" data-serviceblob="{{ service | to_json }}" data-toggle="modal" data-target="#service_modal">View</a></span>
+                        </td>
+                        <td>
+                            <span><a role="button" class="btn btn-sm btn-primary mb-2" href="{{ url_for('sla_bp.create', service_id=service.id) }}">Create SLA</a></span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Modal -->
+    <div class="modal" id="service_modal" tabindex="-1" role="dialog" aria-labelledby="service_label"
+      aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="service_label">Details</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+          </div>
+          <div class="modal-footer">
+            <a role="button" class="btn btn-sm btn-primary" data-dismiss="modal">Close</a>
+          </div>
+        </div>
+      </div>
+    </div>
+ </div>
+<br>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+$(document).ready(function () {
+
+    $('#dtsla').dataTable( {
+    });
+
+});
+
+</script>
+
+<script>
+
+function create_openstack_tmpl(service){
+  let template = `
+        <div class="container">
+        <dl class="row"><dt class="col-sm-3">Site:</dt><dd class="col-sm-9">${service.doc.data.sitename}</dd></dl>
+        <dl class="row"><dt class="col-sm-3">Type:</dt><dd class="col-sm-9">${service.doc.data.service_type}</dd></dl>
+        <dl class="row"><dt class="col-sm-3">Endpoint:</dt><dd class="col-sm-9">${service.doc.data.endpoint}</dd></dl>
+        <dl class="row"><dt class="col-sm-3">Region:</dt><dd class="col-sm-9">${service.doc.data.region}</dd></dl>
+        <dl class="row"><dt class="col-sm-3">Public IPs:</dt><dd class="col-sm-9">${service.doc.data.public_ip_assignable}</dd></dl>
+        </div>`;
+  return template;
+}
+
+function create_marathon_tmpl(service){
+  let template = `
+        <div class="container">
+        <dl class="row"><dt class="col-sm-4">Site:</dt><dd class="col-sm-8">${service.doc.data.sitename}</dd></dl>
+        <dl class="row"><dt class="col-sm-4">Type:</dt><dd class="col-sm-8">${service.doc.data.service_type}</dd></dl>
+        <dl class="row"><dt class="col-sm-4">Endpoint:</dt><dd class="col-sm-8">${service.doc.data.endpoint}</dd></dl>
+        <dl class="row"><dt class="col-sm-4">Load Balancer:</dt><dd class="col-sm-8">${service.doc.data.properties.load_balancer_ips}</dd></dl>
+        <dl class="row"><dt class="col-sm-4">Storage drivers:</dt><dd class="col-sm-8">${service.doc.data.properties.persistent_storage_drivers}</dd></dl>
+        <dl class="row"><dt class="col-sm-4">CPU num:</dt><dd class="col-sm-8">${service.doc.data.properties.num_cpus}</dd></dl>
+        <dl class="row"><dt class="col-sm-4">Mem (MB):</dt><dd class="col-sm-8">${service.doc.data.properties.mem_total}</dd></dl>
+        <dl class="row"><dt class="col-sm-4">GPU support:</dt><dd class="col-sm-8">${service.doc.data.properties.gpu_support}</dd></dl>
+        `;
+        if (service.doc.data.properties.gpu_support){
+          template = template + `
+          <dl class="row"><dt class="col-sm-4">GPU num:</dt><dd class="col-sm-8">${service.doc.data.properties.num_gpus}</dd></dl>
+          <dl class="row"><dt class="col-sm-4">GPU vendor:</dt><dd class="col-sm-8">${service.doc.data.properties.gpu_vendor}</dd></dl>
+          <dl class="row"><dt class="col-sm-4">GPU model:</dt><dd class="col-sm-8">${service.doc.data.properties.gpu_model}</dd></dl>
+          </div>`;
+        }
+        else {
+         template = template + `</div>`;
+        }
+  return template;
+}
+
+function create_chronos_tmpl(service){
+  let template = `
+        <div class="container">
+        <dl class="row"><dt class="col-sm-4">Site:</dt><dd class="col-sm-8">${service.doc.data.sitename}</dd></dl>
+        <dl class="row"><dt class="col-sm-4">Type:</dt><dd class="col-sm-8">${service.doc.data.service_type}</dd></dl>
+        <dl class="row"><dt class="col-sm-4">Endpoint:</dt><dd class="col-sm-8">${service.doc.data.endpoint}</dd></dl>
+        <dl class="row"><dt class="col-sm-4">CPU num:</dt><dd class="col-sm-8">${service.doc.data.properties.num_cpus}</dd></dl>
+        <dl class="row"><dt class="col-sm-4">Mem (MB):</dt><dd class="col-sm-8">${service.doc.data.properties.mem_total}</dd></dl>
+        <dl class="row"><dt class="col-sm-4">GPU support:</dt><dd class="col-sm-8">${service.doc.data.properties.gpu_support}</dd></dl>
+        `;
+        if (service.doc.data.properties.gpu_support){
+          template = template + `
+          <dl class="row"><dt class="col-sm-4">GPU num:</dt><dd class="col-sm-8">${service.doc.data.properties.num_gpus}</dd></dl>
+          <dl class="row"><dt class="col-sm-4">GPU vendor:</dt><dd class="col-sm-8">${service.doc.data.properties.gpu_vendor}</dd></dl>
+          <dl class="row"><dt class="col-sm-4">GPU model:</dt><dd class="col-sm-8">${service.doc.data.properties.gpu_model}</dd></dl>
+          </div>`;
+        }
+        else {
+         template = template + `</div>`;
+        }
+
+  return template;
+}
+
+$('#service_modal').on('show.bs.modal', function (event) {
+    var target = $(event.relatedTarget) // Button that triggered the modal
+    // Extract info from data-* attributes
+    var service = target.data('serviceblob')
+
+    var modal = $(this)
+    modal.find('.modal-title').text(service.id)
+    var body = ""
+    if(service.doc.data.service_type == 'org.openstack.nova'){
+        body = create_openstack_tmpl(service)
+    }
+    else if(service.doc.data.service_type == 'eu.indigo-datacloud.marathon')
+    {
+        body = create_marathon_tmpl(service)
+    }
+    else if(service.doc.data.service_type == 'eu.indigo-datacloud.chronos')
+    {
+        body = create_chronos_tmpl(service)
+    }
+    modal.find('.modal-body').html(body)
+
+})
+</script>
+{% endblock %}

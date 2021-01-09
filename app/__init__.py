@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from flask import Flask
+from flask import Flask, json
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flaat import Flaat
 
@@ -21,6 +21,10 @@ from app.auth import egicheckin
 from .models import migrate, alembic, db, OAuth, User, Role, Group, login_manager
 import logging
 from flask_dance.consumer import oauth_authorized
+
+
+def to_json(obj):
+    return json.dumps(obj, separators=(',', ': '))
 
 app = Flask(__name__, instance_relative_config=True)
 app.wsgi_app = ProxyFix(app.wsgi_app)
@@ -87,6 +91,11 @@ app.register_blueprint(sla_bp, url_prefix="/sla")
 
 from app.group.routes import group_bp
 app.register_blueprint(group_bp, url_prefix="/group")
+
+from app.provider.routes import provider_bp
+app.register_blueprint(provider_bp, url_prefix="/provider")
+
+app.jinja_env.filters['to_json'] = to_json
 
 
 
