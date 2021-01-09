@@ -2,17 +2,22 @@
 
 {% block content %}
 <div class="container-fluid">
-    <div class="card m-4">
-        <div class="card-header info-color white-text">
-            <div class="row">
-                <div class="col-6 text-uppercase">
-                    <h5><strong>{{title}}</strong></h5>
-                </div>
-                <div class="col-6 text-right">
-                    <button type=button class="btn btn-sm btn-outline-white waves-effect m-0" onclick="history.back()"><i class="fas fa-arrow-left mr-1"></i> Back</button>
-                </div>
-            </div>
+    <!-- Heading -->
+      <div class="card m-4">
+
+        <!--Card content-->
+        <div class="card-body d-sm-flex justify-content-between text-primary">
+          <h4 class="mb-2 mb-sm-0 pt-1">
+            <span class="text-uppercase">{{title}}</span>
+          </h4>
+          <div class="d-flex justify-content-center">
+              <button type=button class="btn btn-sm btn-outline-blue waves-effect m-0" onclick="history.back()"><i class="fas fa-arrow-left mr-1"></i> Back</button>
+          </div>
         </div>
+
+      </div>
+    <!-- End Heading -->
+    <div class="card m-4">
         <div class="card-body px-lg-5 pt-0">
             <p>
             <h4>General information:</h4>
@@ -33,7 +38,7 @@
             <div class="table-responsive">
                 <table class="table table-striped dt-responsive nowrap table-sm" id="dtsla" width="100%" cellspacing="0" style="width:100%">
                 <!--Table head-->
-                  <thead>
+                  <thead class="blue lighten-4">
                     <tr>
                       <th class="th-sm">SLA id</th>
                       <th class="th-sm">Provider</th>
@@ -64,7 +69,7 @@
         </div>
     </div>
  </div>
-
+<br>
 
 <script>
 $(document).ready(function () {
