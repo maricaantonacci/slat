@@ -109,8 +109,7 @@ def create():
     service_id = request.args.get('service_id', None)
     if service_id:
         form.type.data = service_id
-        form.type.choices = [(service_id, service_id, dict(disabled='disabled'))]
-        form.type.render_kw = {'disabled': 'disabled'}
+        form.type.choices = [(service_id, service_id, dict())]
     else:
         services = cmdb_client.get_services(detailed=True)
         form.type.choices = [(s['id'], s['id'], dict(data_subtext="site: {}, service type: {}, service endpoint: {}".format(s['doc']['data']['sitename'], s['doc']['data']['service_type'], s['doc']['data']['endpoint']))) for s in services]
