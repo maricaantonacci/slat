@@ -67,17 +67,18 @@ class TokenDecoder:
 @flaat.login_required()
 def get(legacy_customer=None):
 
-    td = TokenDecoder()
-    groups = td.get_groups(request)
-
-    app.logger.debug("Requesting slas for group {}".format(groups))
+    # td = TokenDecoder()
+    # groups = td.get_groups(request)
+    #
+    # app.logger.debug("Requesting slas for group {}".format(groups))
     slas = []
     # get first group that has an associated SLA
-    group = next(filter(lambda group : db.session.query(models.Sla).filter(models.Sla.customer==group).all(), groups), None)
+    #group = next(filter(lambda group : db.session.query(models.Sla).filter(models.Sla.customer==group).all(), groups), None)
+    group = legacy_customer
     if group:
-      slas = db.session.query(models.Sla).filter(models.Sla.customer==group).all()
+      slas = db.session.query(models.Sla).filter(models.Sla.customer == group).all()
 
-    app.logger.debug("Computed slas: {}".format(slas))
+    app.logger.debug("Computed slas for group {}: {}".format(group, slas))
 
     response = make_response(render_template('slas.json', slas=slas, customer=legacy_customer))
     response.headers['Content-Type'] = 'application/json'
