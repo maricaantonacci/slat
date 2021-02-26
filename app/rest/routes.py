@@ -39,49 +39,24 @@ class TokenDecoder:
         decoder = decoders.factory.get_decoder(idp['type'])
         return decoder.get_groups(info)
 
-
-# @rest_bp.route("/create", methods=["POST"])
-# @flaat.login_required()
-# def create():
-#     if not request.json or not 'service_id' in request.json:
-#         return "service_id field is mandatory", 400
-#     isla = request.json
-#
-#     td = TokenDecoder()
-#     isla['user_group'] = td.get_group(request)
-#
-#     service = isla['service_id']
-#     if not cmdb_client.is_valid_service(service):
-#         return "Service with id {} not found".format(service), 404
-#     else:
-#         new_sla = models.Sla(**isla)
-#         try:
-#             db.session.add(new_sla)
-#             db.session.commit()
-#         except IntegrityError as e:
-#             return str(e.args[0]), 400
-#         return "", 204
-
-
-@rest_bp.route("/slam/preferences/<legacy_customer>", methods=["GET"])
+@rest_bp.route("/slam/preferences/<group>", methods=["GET"])
 @flaat.login_required()
-def get(legacy_customer=None):
+def get_by_group(group=None):
 
-    # td = TokenDecoder()
-    # groups = td.get_groups(request)
-    #
-    # app.logger.debug("Requesting slas for group {}".format(groups))
     slas = []
-    # get first group that has an associated SLA
-    #group = next(filter(lambda group : db.session.query(models.Sla).filter(models.Sla.customer==group).all(), groups), None)
-    group = legacy_customer
     if group:
       slas = db.session.query(models.Sla).filter(models.Sla.customer == group).all()
 
     app.logger.debug("Computed slas for group {}: {}".format(group, slas))
 
-    response = make_response(render_template('slas.json', slas=slas, customer=legacy_customer))
+    response = make_response(render_template('slas.json', slas=slas, customer=group))
     response.headers['Content-Type'] = 'application/json'
     return response
 
+@rest_bp.route("/slam/preferences/<group>/<subgroup>", methods=["GET"])
+@flaat.login_required()
+def get_by_subgroup(group, subgroup=None):
+    if subgroup:
+        group = group + '/' + subgroup
+    return get_by_group(group)
 
