@@ -1,5 +1,27 @@
 #!/bin/bash
 
+CA_BUNDLE_PATH=$(python3 -m certifi)
+
+CERT_PATH=${CERT_PATH:-"/trusted_certs"}
+
+[ ! -d "${CERT_PATH}" ] && { echo "${CERT_PATH} does not exist. Nothing to do...exit"; exit 1; }
+
+cd "${CERT_PATH}"
+
+for cert in `ls *.pem`; do
+  md5res=`md5sum $cert`
+  md5sum_str=`echo "$md5res" | cut -d' ' -f1`
+  grep "$md5sum_str" .added_certs &> /dev/null
+  if [ $? == 0 ]; then
+        echo "Cert $cert alredy added"
+  else
+     echo "Adding Cert from file $cert to the CA bundle"
+     cat $cert >> "$CA_BUNDLE_PATH" && echo "$md5res" >> .added_certs
+  fi
+done
+
+cd -
+
 python manage.py db upgrade || exit 1
 
 if [ "${ENABLE_HTTPS}" == "True" ]; then
