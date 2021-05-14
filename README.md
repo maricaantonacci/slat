@@ -113,6 +113,18 @@ docker run -d -p 5001:5001 --name='slat' \
 
 Access slat UI at `https://<PROXY_HOST>/`
 
+### Add trusted certificates
+
+If you need to install and trust certificates that are not included in the default CA bundle used by SLAT python application running in a docker container, you can mount the directory containing the cerficate(s) in PEM format (extensione .pem) in the container under the path /trusted_certs; e.g:
+
+```
+docker un -d -p 5001:5001 --name='slat' \
+           -v $PWD/instance:/app/instance \
+           -v $PWD/trusted_certs:/trusted_certs \
+           marica/slat:latest
+```
+The certificates provided in the directory will be automatically added to the python CA bundle.
+
 ### Performance tuning
 
 You can change the number of gunicorn worker processes using the environment variable WORKERS.
