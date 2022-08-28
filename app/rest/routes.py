@@ -11,9 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from flaat import tokentools, issuertools
+from flaat import access_tokens
 from app import app, flaat, decoders, models, db, cmdb
-from flask import Blueprint, request, render_template, make_response
+from flask import Blueprint, render_template, make_response
 
 rest_bp = Blueprint('rest_bp', __name__,
                            template_folder='templates',
@@ -24,11 +24,11 @@ cmdb_client = cmdb.Client(app.config.get("CMDB_URL"), cacert=app.config.get("CMD
 
 class TokenDecoder:
     def get_groups(self, request):
-        access_token = tokentools.get_access_token_from_request(request)
-        issuer = issuertools.find_issuer_config_in_at(access_token)
+        access_token = access_tokens.get_access_token_from_request(request)
+        issuer = "" #issuertools.find_issuer_config_in_at(access_token)
         #info = flaat.get_info_thats_in_at(access_token)
         info = flaat.get_info_from_userinfo_endpoints(access_token)
-        iss = issuer['issuer']
+        iss = "" #issuer['issuer']
 
         idp = next(filter(lambda x: x['iss']==iss, app.config.get('TRUSTED_OIDC_IDP_LIST')))
 
@@ -40,7 +40,7 @@ class TokenDecoder:
         return decoder.get_groups(info)
 
 @rest_bp.route("/slam/preferences/<group>", methods=["GET"])
-@flaat.login_required()
+@flaat.is_authenticated()
 def get_by_group(group=None):
 
     slas = []
@@ -54,7 +54,7 @@ def get_by_group(group=None):
     return response
 
 @rest_bp.route("/slam/preferences/<group>/<subgroup>", methods=["GET"])
-@flaat.login_required()
+@flaat.is_authenticated()
 def get_by_subgroup(group, subgroup=None):
     if subgroup:
         group = group + '/' + subgroup
