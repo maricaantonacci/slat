@@ -15,7 +15,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, IntegerField, SelectField, SubmitField
 from wtforms.validators import DataRequired, ValidationError
-from wtforms.fields.html5 import DateField
+from wtforms.fields import DateField
 from wtforms.widgets import html_params, Select
 from markupsafe import Markup
 

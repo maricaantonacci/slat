@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from flaat import tokentools
+from flaat import access_tokens
 from flask import current_app as app, flash
 from flask_dance import OAuth2ConsumerBlueprint
 from flask_dance.consumer.storage.sqla import SQLAlchemyStorage
@@ -62,7 +62,7 @@ def auth_blueprint_login(blueprint, token):
         return False
 
     resp = blueprint.session.get('/userinfo')
-    jwt = tokentools.get_accesstoken_info(token['access_token'])
+    jwt = access_tokens.get_access_token_info(token['access_token'])
 
     if not resp.ok:
         msg = "Failed to fetch user info."
@@ -70,8 +70,8 @@ def auth_blueprint_login(blueprint, token):
         return False
 
     user_info = resp.json()
-    user_id = jwt['body']['sub']
-    issuer = jwt['body']['iss']
+    user_id = jwt.body['sub']
+    issuer = jwt.issuer
 
     # Find this OAuth token in the database, or create it
     oauth = OAuth.query.filter_by(

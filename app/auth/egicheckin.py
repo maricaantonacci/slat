@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from flaat import tokentools
+from flaat import access_tokens
 from flask import flash, current_app as app
 from flask_dance import OAuth2ConsumerBlueprint
 from flask_dance.consumer.storage.sqla import SQLAlchemyStorage
@@ -21,9 +21,9 @@ import re
 
 def create_blueprint():
     egicheckin_base_url = app.config['EGI_AAI_BASE_URL']
-    egicheckin_token_url = egicheckin_base_url + '/token'
-    egicheckin_refresh_url = egicheckin_base_url + '/token'
-    egicheckin_authorization_url = egicheckin_base_url + '/authorize'
+    egicheckin_token_url = egicheckin_base_url + '/protocol/openid-connect/token'
+    egicheckin_refresh_url = egicheckin_base_url + '/protocol/openid-connect/token'
+    egicheckin_authorization_url = egicheckin_base_url + '/protocol/openid-connect/auth'
 
     return OAuth2ConsumerBlueprint(
         "egiaai", __name__,
@@ -33,6 +33,7 @@ def create_blueprint():
         token_url=egicheckin_token_url,
         auto_refresh_url=egicheckin_refresh_url,
         authorization_url=egicheckin_authorization_url,
+        scope=['openid', 'profile', 'email', 'offline_access', 'eduperson_entitlement'],
         redirect_to='provider_bp.list',
         storage=SQLAlchemyStorage(OAuth, db.session, user=current_user)
     )
@@ -59,8 +60,8 @@ def auth_blueprint_login(blueprint, token):
         flash("Failed to log in with EGI Checkin.", category="error")
         return False
 
-    resp = blueprint.session.get('/oidc/userinfo')
-    jwt = tokentools.get_accesstoken_info(token['access_token'])
+    resp = blueprint.session.get('/auth/realms/egi/protocol/openid-connect/userinfo')
+    jwt = access_tokens.get_access_token_info(token['access_token'])
 
     if not resp.ok:
         msg = "Failed to fetch user info."
@@ -68,8 +69,8 @@ def auth_blueprint_login(blueprint, token):
         return False
 
     user_info = resp.json()
-    user_id = jwt['body']['sub']
-    issuer = jwt['body']['iss']
+    user_id = jwt.body['sub']
+    issuer = jwt.issuer
 
     # Find this OAuth token in the database, or create it
     oauth = OAuth.query.filter_by(

@@ -22,7 +22,7 @@ from flask_migrate import Migrate
 from flask_alembic import Alembic
 from flask_login import UserMixin
 from flask_login import LoginManager
-from flaat import tokentools
+from flaat import access_tokens
 
 # initialize SQLAlchemy
 db: SQLAlchemy = SQLAlchemy()
@@ -135,11 +135,11 @@ class OAuth(OAuthConsumerMixin, db.Model):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         token = kwargs['token']
-        jwt = tokentools.get_accesstoken_info(token['id_token'])
+        jwt = access_tokens.get_access_token_info(token['id_token'])
         if not 'provider_user_id' in kwargs:
-            self.provider_user_id = jwt['body']['sub']
+            self.provider_user_id = jwt.body['sub']
         if not 'issuer' in kwargs:
-            self.issuer = jwt['body']['iss']
+            self.issuer = jwt.issuer
 
 
 

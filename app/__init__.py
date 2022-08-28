@@ -14,11 +14,11 @@
 
 from flask import Flask, json
 from werkzeug.middleware.proxy_fix import ProxyFix
-from flaat import Flaat
+from flaat.flask import Flaat
 
 from app.auth import indigoiam
 from app.auth import egicheckin
-from .models import migrate, alembic, db, OAuth, User, Role, Group, login_manager
+from .models import alembic, migrate, db, OAuth, User, Role, Group, login_manager
 import logging
 from flask_dance.consumer import oauth_authorized
 
@@ -30,7 +30,7 @@ app = Flask(__name__, instance_relative_config=True)
 app.wsgi_app = ProxyFix(app.wsgi_app)
 app.secret_key = "30bb7cf2-1fef-4d26-83f0-8096b6dcc7a3"
 app.config.from_object('config.default')
-app.config.from_json('config.json')
+app.config.from_file('config.json', load=json.load)
 
 with app.app_context():
     iam_blueprint = indigoiam.create_blueprint()
@@ -57,12 +57,11 @@ with app.app_context():
             return dict(is_egi_aai_enabled=True)
 
 flaat = Flaat()
-flaat.set_web_framework('flask')
-flaat.set_trusted_OP_list([idp['iss'] for idp in app.config.get('TRUSTED_OIDC_IDP_LIST')])
-flaat.set_timeout(20)
-flaat.set_client_connect_timeout(20)
-flaat.set_iss_config_timeout(20)
+flaat.init_app(app)
 
+with app.app_context():
+    flaat.set_trusted_OP_list([idp['iss'] for idp in app.config.get('TRUSTED_OIDC_IDP_LIST')])
+    flaat.set_request_timeout(20)
 
 db.init_app(app)
 migrate.init_app(app, db)
